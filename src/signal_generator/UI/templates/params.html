@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Diseño {{ kind|capitalize }} — {{ "Señal 1" if channel == "sig1" else "Señal 2" }}</h2>
+
+<form id="form">
+  <input type="hidden" name="kind" value="{{ kind }}">
+
+  {% if kind == "lineal" %}
+  <label for="m">Pendiente (m):</label>
+  <input name="m" id="m" type="number" step="0.1" value="1">
+  <label for="b">Ordenada (b):</label>
+  <input name="b" id="b" type="number" step="0.1" value="0">
+  {% elif kind == "cuadrada" %}
+  <label for="duty">Ciclo de trabajo (%):</label>
+  <input name="duty" id="duty" type="number" step="1" value="50">
+  {% elif kind == "exponencial" %}
+  <label for="k">Factor k (≥1):</label>
+  <input name="k" id="k" type="number" step="0.1" value="2" min="1">
+  {% endif %}
+
+  <button type="button" id="saveBtn">Guardar y Continuar</button>
+</form>
+
+<div style="margin-top: 2rem;">
+    <canvas id="plot" width="700" height="250"></canvas>
+</div>
+
+<script>
+    const form = document.getElementById('form');
+    const saveBtn = document.getElementById('saveBtn');
+    const plotCanvas = document.getElementById('plot');
+    const chart = new Chart(plotCanvas, {
+        type: 'line',
+        data: {
+            labels: [...Array({{ samples }}).keys()],
+            datasets: [{label: "Señal Generada", data: [], pointRadius: 0, borderColor: 'rgb(75, 192, 192)', tension: 0.1 }]
+        },
+        options: { animation: false, scales: { y: { min: 0, max: 255 } } }
+    });
+
+    function updatePlot() {
+        fetch('/preview', { method: 'POST', body: new FormData(form) })
+            .then(response => response.json())
+            .then(data => {
+                chart.data.datasets[0].data = data.values;
+                chart.update('none'); // 'none' para evitar re-animación
+            });
+    }
+    
+    // Actualizar el gráfico al cargar y en cada cambio
+    updatePlot();
+    form.addEventListener('input', updatePlot);
+
+    saveBtn.addEventListener('click', () => {
+        const formData = new FormData(form);
+        const params = Object.fromEntries(formData.entries());
+
+        fetch('/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                channel: '{{ channel }}',
+                kind: '{{ kind }}',
+                params: params
+            })
+        })
+        .then(response => response.json())
+        .then(json => {
+            if (json.next === 'sig2') {
+                location.href = '/';
+            } else {
+                location.href = '/final';
+            }
+        });
+    });
+</script>
+{% endblock %}

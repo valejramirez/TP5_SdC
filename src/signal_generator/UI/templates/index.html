@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{% if not sig1_exists %}
+    <!-- Bloque para el PASO 1 (si sig1.bin NO existe) -->
+    <h2>Paso 1: Diseñar Señal 1</h2>
+    <p>Selecciona el tipo de onda para la primera señal.</p>
+    <ul class="button-list">
+    {% for k in ["lineal","cuadrada","senoidal", "cosenoidal","exponencial"] %}
+        <li>
+            <a href="/design/sig1/{{k}}" class="button-link">{{ k|capitalize }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+
+{% else %}
+    <!-- Bloque para el PASO 2 (si sig1.bin SÍ existe) -->
+    <h2>Paso 2: Diseñar Señal 2</h2>
+    <p>¡Señal 1 guardada con éxito! Ahora diseña la segunda señal.</p>
+    <ul class="button-list">
+    {% for k in ["lineal","cuadrada","senoidal", "cosenoidal","exponencial"] %}
+        <li>
+            <!-- Los enlaces ahora apuntan a sig2 -->
+            <a href="/design/sig2/{{k}}" class="button-link">{{ k|capitalize }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+
+{% endif %}
+
+{% endblock %}

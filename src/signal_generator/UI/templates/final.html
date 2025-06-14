@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Paso Final: Configurar Ejecución</h2>
+<p>Ambas señales han sido guardadas. Ingresa el período de muestreo y presiona "Generar y Ejecutar" para iniciar el proceso.</p>
+<form action="/run" method="post">
+    <label for="period">Periodo de muestreo (ms):</label>
+    <input type="number" name="period" id="period" value="100" min="1" required>
+    <br><br>
+    <button type="submit">Generar y Ejecutar</button>
+</form>
+{% endblock %}

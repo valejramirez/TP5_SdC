@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div style="text-align: center;">
+        <h2>¡Ejecución Iniciada!</h2>
+        <p>Las señales están siendo generadas por el ejecutable en segundo plano.</p>
+        <p>Puedes cerrar esta ventana o diseñar un nuevo par de señales.</p>
+        
+        <!-- Este formulario apunta a nuestra nueva ruta /reset -->
+        <form action="/reset" method="post" style="margin-top: 2rem;">
+            <button type="submit">Diseñar Nuevas Señales (Empezar de Cero)</button>
+        </form>
+    </div>
+{% endblock %}

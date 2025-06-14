@@ -1,0 +1,187 @@
+/* ==========================================================================
+   Configuración Global y Variables de Color (Modo Oscuro)
+   ========================================================================== */
+
+/* Usamos variables CSS para que sea fácil cambiar los colores de toda la app */
+:root {
+    --bg-color: #121212;         /* Fondo principal muy oscuro */
+    --surface-color: #1e1e1e;   /* Color para superficies como formularios y contenedores */
+    --primary-color: #3e9fef;    /* Un azul vibrante como color de acento */
+    --primary-hover: #68b6f3;    /* Azul más claro para el hover */
+    --text-color: #e0e0e0;       /* Color de texto principal (blanco roto) */
+    --text-secondary: #a0a0a0;   /* Color para texto secundario o menos importante */
+    --border-color: #444;       /* Color sutil para los bordes */
+}
+html {
+        /* --- AÑADIR ESTAS LÍNEAS --- */
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;    /* Centra verticalmente */
+    min-height: 100vh;      /* Ocupa como mínimo toda la altura de la pantalla */
+}
+/* Reseteo básico y estilo del cuerpo */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    
+    /* --- AÑADIR ESTAS LÍNEAS --- */
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;    /* Centra verticalmente */
+    min-height: 100vh;      /* Ocupa como mínimo toda la altura de la pantalla */
+}
+
+/* Contenedor principal para centrar el contenido y limitar el ancho */
+main {
+    max-width: 800px; /* Mantenemos un ancho máximo para que no se estire demasiado en pantallas grandes */
+    margin: 0 auto;   /* Este es el método más simple y robusto para centrar un bloque */
+    padding: 2rem;
+    display: flex;          /* Lo convertimos en un contenedor flex */
+    flex-direction: column; /* Sus hijos se apilarán verticalmente */
+    align-items: center;    /* Centra a todos sus hijos horizontalmente */
+}
+
+/* ==========================================================================
+   Tipografía y Títulos
+   ========================================================================== */
+
+h1, h2, h3 {
+    color: var(--text-color);
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.75rem;
+    color: var(--text-secondary);
+}
+
+p, label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+/* ==========================================================================
+   Botones y Enlaces Estilizados
+   ========================================================================== */
+
+.button-list {
+    list-style-type: none;
+    padding: 10px;
+    display: flex;
+    flex-direction: row; /* APILA LOS BOTONES VERTICALMENTE */
+    align-items: center;    /* Centra los botones si tuvieran anchos diferentes */
+    gap: 1rem;              /* Espacio vertical entre botones */
+
+}
+
+.button-link {
+    display: inline-block;
+    padding: 12px 28px;
+    background-color: var(--surface-color);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.button-link:hover {
+    background-color: var(--primary-color);
+    color: var(--bg-color); /* Texto oscuro sobre fondo claro */
+    transform: translateY(-2px); /* Pequeño efecto de elevación */
+    box-shadow: 0 4px 10px rgba(62, 159, 239, 0.3); /* Sombra de color azul */
+}
+
+/* Estilo general para todos los botones de formulario */
+button, input[type="submit"] {
+    display: inline-block;
+    padding: 12px 28px;
+    background-color: var(--primary-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-top: 1rem;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(62, 159, 239, 0.3);
+}
+
+
+/* ==========================================================================
+   Formularios y Entradas
+   ========================================================================== */
+
+form {
+    background-color: var(--surface-color);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-top: 2rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input[type="number"],
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-color);
+    font-size: 1rem;
+    box-sizing: border-box; /* Asegura que el padding no aumente el ancho */
+    margin-bottom: 1.5rem;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(62, 159, 239, 0.2);
+}
+
+/* ==========================================================================
+   Clases de Utilidad
+   ========================================================================== */
+
+.centered {
+    text-align: center;
+}

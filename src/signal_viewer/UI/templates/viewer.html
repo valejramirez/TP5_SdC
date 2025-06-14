@@ -1,0 +1,163 @@
+{% extends "layout.html" %}
+{% block body %}
+<!-- 1. CAMBIO DE TAMAÑO: Envolvemos el canvas en un div con altura y anchura definidas -->
+<div style="width: 100%; max-width: 900px; height: 450px; margin: 2rem auto;">
+    <h2>Visualizador de Señales en Tiempo Real</h2>
+    <canvas id="signalChart" class="chart-wrapper"></canvas>
+</div>
+
+<div class="button-list" style="margin-top: 1.5rem;">
+    <button id="btn-ch1" data-channel="0" class="button-link active">Ver Señal 1</button>
+    <button id="btn-ch2" data-channel="1" class="button-link">Ver Señal 2</button>
+</div>
+
+<script>
+    const MAX_POINTS = 256;
+    const chartCanvas = document.getElementById('signalChart');
+    
+    const chart = new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+            labels: Array.from({ length: MAX_POINTS }, (_, i) => i),
+            datasets: [{
+                label: 'Señal Actual',
+                data: Array(MAX_POINTS).fill(null),
+                borderColor: '#3e9fef',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                y: {
+                    min: 0,
+                    max: 255,
+                    ticks: { color: 'white' }, 
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                },
+                x: { display: false }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            }
+        }
+    });
+
+    // --- LÓGICA DE CONEXIÓN Y BOTONES (VERSIÓN FINAL Y ROBUSTA) ---
+
+    // 1. Declaramos la variable sse, pero NO la inicializamos aquí.
+    let sse;
+
+    // 2. Creamos una función que es la ÚNICA responsable de la conexión.
+    function connectToStream() {
+        // Si ya hay una conexión, la cerramos para evitar duplicados.
+        if (sse) {
+            sse.close();
+        }
+
+        console.log("Attempting to connect to /stream...");
+        sse = new EventSource("/stream");
+
+        sse.onopen = () => {
+            console.log("✅ SSE Connection OPENED.");
+        };
+
+        sse.onmessage = (event) => {
+            // Este console.log es la prueba definitiva de que estás recibiendo datos.
+            console.log("SSE message received:", event.data); 
+            try {
+                const new_data = JSON.parse(event.data);
+                if (new_data.error) {
+                    console.error("Error from stream:", new_data.error);
+                    sse.close();
+                    return;
+                }
+
+                const currentData = chart.data.datasets[0].data;
+                // Si el gráfico está vacío (lleno de nulls), lo inicializamos
+                if (currentData.some(d => d === null)) {
+                    currentData.length = 0; 
+                    for (let i = 0; i < MAX_POINTS; i++) { currentData.push(0); }
+                }
+
+                currentData.push(...new_data);
+                currentData.splice(0, new_data.length);
+                
+                chart.update('quiet');
+            } catch (e) {
+                console.error("Failed to parse SSE data:", event.data, e);
+            }
+        };
+
+        sse.onerror = (err) => {
+            console.error("❌ SSE Connection FAILED:", err);
+            sse.close();
+        };
+    }
+
+    // --- Lógica de los Botones ---
+    const btnCh1 = document.getElementById('btn-ch1');
+    const btnCh2 = document.getElementById('btn-ch2');
+
+    function setActiveButton(activeBtn) {
+        btnCh1.classList.remove('active');
+        btnCh2.classList.remove('active');
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            chart.data.datasets[0].label = `Señal ${parseInt(activeBtn.dataset.channel) + 1}`;
+        }
+    }
+
+    // 3. `selectChannel` ahora orquesta todo en el orden correcto.
+    async function selectChannel(channel, buttonElement) {
+        console.log(`--- Selecting channel ${channel} ---`);
+        setActiveButton(buttonElement);
+        chart.data.datasets[0].data = Array(MAX_POINTS).fill(null);
+        chart.update('quiet');
+
+        try {
+            // PASO A: Le decimos al backend que cambie el canal.
+            console.log(`Sending POST to /select_channel with channel: ${channel}`);
+            await fetch('/select_channel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ channel: channel })
+            });
+            console.log("Backend acknowledged channel change.");
+
+            // PASO B: SÓLO DESPUÉS de que el backend confirma, iniciamos el stream.
+            // <<< ESTE ES EL ARREGLO CLAVE >>>
+            connectToStream();
+
+        } catch (error) {
+            console.error("Failed to set channel on backend:", error);
+        }
+    }
+
+    btnCh1.addEventListener('click', () => { selectChannel(0, btnCh1); });
+    btnCh2.addEventListener('click', () => { selectChannel(1, btnCh2); });
+    
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .button-link.active {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(62, 159, 239, 0.3);
+        }
+    `;
+    document.head.appendChild(style);
+
+    // --- INICIALIZACIÓN ---
+    // Al cargar la página, se llama a selectChannel, que inicia todo el proceso.
+    selectChannel(0, btnCh1);
+
+</script>
+{% endblock %}
